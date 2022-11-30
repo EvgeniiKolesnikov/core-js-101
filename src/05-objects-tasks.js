@@ -20,17 +20,23 @@
  *    console.log(r.height);      // => 20
  *    console.log(r.getArea());   // => 200
  */
-class Rectangle {
-  constructor(width, height) {
-    this.width = width;
-    this.height = height;
-  }
-
-  getArea() {
+function Rectangle(width, height) {
+  this.width = width;
+  this.height = height;
+  Rectangle.prototype.getArea = function getArea() {
     return this.width * this.height;
-  }
+  };
 }
 
+//  class Rectangle {
+//   constructor(width, height) {
+//     this.width = width;
+//     this.height = height;
+//   }
+//   getArea() {
+//     return this.width * this.height;
+//   }
+// }
 
 /**
  * Returns the JSON representation of specified object
@@ -116,34 +122,88 @@ function fromJSON(proto, json) {
  *
  *  For more examples see unit tests.
  */
+class MySuperBaseElementSelector {
+  constructor(value, type) {
+    this.value = value;
+    this.type = type;
+  }
+
+  stringify() {
+    return this.value.toString();
+  }
+
+  element(value) {
+    if (this.type === 'element') this.error('repeatSelector');
+    if (this.type.length > 0) this.error('orderSelector');
+    return new MySuperBaseElementSelector(`${this.value}${value}`, `${this.type} element`);
+  }
+
+  id(value) {
+    if (this.type.includes('id')) this.error('repeatSelector');
+    if (this.type.replace(/element/g, '').trim().length > 0) this.error('orderSelector');
+    return new MySuperBaseElementSelector(`${this.value}#${value}`, `${this.type} id`);
+  }
+
+  class(value) {
+    if (this.type.replace(/element|id|class/g, '').trim().length > 0) this.error('orderSelector');
+    return new MySuperBaseElementSelector(`${this.value}.${value}`, `${this.type} class`);
+  }
+
+  attr(value) {
+    if (this.type.replace(/element|id|class|attr/g, '').trim().length > 0) this.error('orderSelector');
+    return new MySuperBaseElementSelector(`${this.value}[${value}]`, `${this.type} attr`);
+  }
+
+  pseudoClass(value) {
+    if (this.type.replace(/element|id|class|attr|pseudoClass/g, '').trim().length > 0) this.error('orderSelector');
+    return new MySuperBaseElementSelector(`${this.value}:${value}`, `${this.type} pseudoClass`);
+  }
+
+  pseudoElement(value) {
+    if (this.type.includes('pseudoElement')) this.error('repeatSelector');
+    if (this.type.replace(/element|id|class|attr|pseudoClass/g, '').trim().length > 0) this.error('orderSelector');
+    return new MySuperBaseElementSelector(`${this.value}::${value}`, `${this.type} pseudoElement`);
+  }
+
+  error(messageType) {
+    this.message = '';
+    if (messageType === 'repeatSelector') {
+      this.message = 'Element, id and pseudo-element should not occur more then one time inside the selector';
+    }
+    if (messageType === 'orderSelector') {
+      this.message = 'Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element';
+    }
+    throw new Error(this.message);
+  }
+}
 
 const cssSelectorBuilder = {
-  element(/* value */) {
-    throw new Error('Not implemented');
+  element(value) {
+    return new MySuperBaseElementSelector(value, 'element');
   },
 
-  id(/* value */) {
-    throw new Error('Not implemented');
+  id(value) {
+    return new MySuperBaseElementSelector(`#${value}`, 'id');
   },
 
-  class(/* value */) {
-    throw new Error('Not implemented');
+  class(value) {
+    return new MySuperBaseElementSelector(`.${value}`, 'class');
   },
 
-  attr(/* value */) {
-    throw new Error('Not implemented');
+  attr(value) {
+    return new MySuperBaseElementSelector(`[${value}]`, 'attr');
   },
 
-  pseudoClass(/* value */) {
-    throw new Error('Not implemented');
+  pseudoClass(value) {
+    return new MySuperBaseElementSelector(`:${value}`, 'pseudoClass');
   },
 
-  pseudoElement(/* value */) {
-    throw new Error('Not implemented');
+  pseudoElement(value) {
+    return new MySuperBaseElementSelector(`::${value}`, 'pseudoElement');
   },
 
-  combine(/* selector1, combinator, selector2 */) {
-    throw new Error('Not implemented');
+  combine(selector1, combinator, selector2) {
+    return new MySuperBaseElementSelector(`${selector1.value} ${combinator} ${selector2.value}`);
   },
 };
 
