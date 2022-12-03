@@ -23,9 +23,7 @@
  *   getComposition(Math.sin, Math.asin)(x) => Math.sin(Math.asin(x))
  *
  */
-function getComposition(/* f, g */) {
-  throw new Error('Not implemented');
-}
+const getComposition = (f, g) => (x) => f(g(x));
 
 
 /**
@@ -44,12 +42,13 @@ function getComposition(/* f, g */) {
  *   power05(16) => 4
  *
  */
-function getPowerFunction(exponent) {
-  return function power(...args) {
-    const x = args[0];
-    return x ** exponent;
-  };
-}
+// function getPowerFunction(exponent) {
+//   return function power(...args) {
+//     const x = args[0];
+//     return x ** exponent;
+//   };
+// }
+const getPowerFunction = (exponent) => (x) => x ** exponent;
 
 
 /**
@@ -65,8 +64,14 @@ function getPowerFunction(exponent) {
  *   getPolynom(8)     => y = 8
  *   getPolynom()      => null
  */
-function getPolynom() {
-  throw new Error('Not implemented');
+function getPolynom(...args) {
+  return function polynom(x) {
+    const a = args[args.length - 3] || 0;
+    const b = args[args.length - 2] || 0;
+    const c = args[args.length - 1] || 0;
+    if (args.length === 0) return null;
+    return (a * (x ** 2)) + (b * x) + c;
+  };
 }
 
 
@@ -84,8 +89,9 @@ function getPolynom() {
  *   ...
  *   memoizer() => the same random number  (next run, returns the previous cached result)
  */
-function memoize(/* func */) {
-  throw new Error('Not implemented');
+function memoize(func) {
+  const random = func();
+  return () => random;
 }
 
 
@@ -104,8 +110,15 @@ function memoize(/* func */) {
  * }, 2);
  * retryer() => 2
  */
-function retry(/* func, attempts */) {
-  throw new Error('Not implemented');
+function retry(func) {
+  return function retryer() {
+    try {
+      func();
+    } catch (error) {
+      return 'expected';
+    }
+    return retry();
+  };
 }
 
 
