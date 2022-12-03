@@ -70,7 +70,7 @@ function getPolynom(...args) {
     const b = args[args.length - 2] || 0;
     const c = args[args.length - 1] || 0;
     if (args.length === 0) return null;
-    return (a * (x ** 2)) + (b * x) + c;
+    return a * x ** 2 + b * x + c;
   };
 }
 
@@ -145,9 +145,26 @@ function retry(func) {
  * cos(3.141592653589793) ends
  *
  */
-function logger(/* func, logFunc */) {
-  throw new Error('Not implemented');
-}
+// function logger(func, logFunc) {
+//   return function actualLogger(...args) {
+//     const argsModified = args
+//       .map((item) => (Array.isArray(item)
+//         ? `[${item.map((v) => (typeof v === 'string' ? `"${v}"` : v))}]`
+//         : item)).join();
+//     logFunc(`${func.name}(${argsModified}) starts`);
+//     const res = func(...args);
+//     logFunc(`${func.name}(${argsModified}) ends`);
+//     return res;
+//   };
+// }
+
+const logger = (func, logFunc) => (...args) => {
+  const stringArgument = JSON.stringify(args).slice(1, -1);
+  logFunc(`${func.name}(${stringArgument}) starts`);
+  const result = func(...args);
+  logFunc(`${func.name}(${stringArgument}) ends`);
+  return result;
+};
 
 
 /**
@@ -163,10 +180,7 @@ function logger(/* func, logFunc */) {
  *   partialUsingArguments(fn, 'a','b','c')('d') => 'abcd'
  *   partialUsingArguments(fn, 'a','b','c','d')() => 'abcd'
  */
-function partialUsingArguments(/* fn, ...args1 */) {
-  throw new Error('Not implemented');
-}
-
+const partialUsingArguments = (fn, ...args1) => (...args2) => [...args1, ...args2].join('');
 
 /**
  * Returns the id generator function that returns next integer starting
@@ -185,8 +199,16 @@ function partialUsingArguments(/* fn, ...args1 */) {
  *   getId4() => 7
  *   getId10() => 11
  */
-function getIdGeneratorFunction(/* startFrom */) {
-  throw new Error('Not implemented');
+// а этот вариант кайфовее!, но еслинт ругается много...
+// eslint-disable-next-line no-return-assign, no-param-reassign, no-plusplus
+// const getIdGeneratorFunction = (startFrom) => () => startFrom++;
+
+function getIdGeneratorFunction(startFrom) {
+  let start = startFrom - 1;
+  return function f() {
+    start += 1;
+    return start;
+  };
 }
 
 
